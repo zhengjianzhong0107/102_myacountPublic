@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.my.count.dao.IHomeMapper">
+    <select id="list" resultType="com.my.count.model.HomeDto" parameterType="com.my.count.reqdto.Querydto">
+        select *
+        from home
+        <where>
+            (${type})
+            <if test="date != null">
+                and #{date[1]} >= cusDate
+                and cusDate >= #{date[0]}
+            </if>
+            <if test="used==true">
+                and used is true
+            </if>
+        </where>
+        <if test="order != null">
+            order by ${orderProp} ${order}
+        </if>
+        limit #{page},#{num}
+    </select>
+
+    <select id="count" resultType="java.lang.Integer">
+        select count(1)
+        from home
+        <where>
+            (${type})
+            <if test="date != null">
+                and #{date[1]} >= cusDate
+                and cusDate >= #{date[0]}
+            </if>
+            <if test="used==true">
+                and used is true
+            </if>
+        </where>;
+    </select>
+
+    <select id="detail" resultType="com.my.count.model.HomeDto">
+        select *
+        from home
+        where id = #{id};
+    </select>
+
+    <select id="sum" resultType="com.my.count.resdto.SumDto">
+        select type as name, sum(`count`) as value
+        from home
+        <where>
+            (${type})
+            <if test="date != null">
+                and #{date[1]} >= cusDate
+                and cusDate >= #{date[0]}
+            </if>
+            <if test="used==true">
+                and used is true
+            </if>
+        </where>
+        group by type;
+    </select>
+
+    <select id="vs" resultType="com.my.count.resdto.VsDto">
+        select type as name, sum(`count`) as value, custom
+        from home
+        <where>
+            (${type})
+            <if test="date != null">
+                and #{date[1]} >= cusDate
+                and cusDate >= #{date[0]}
+            </if>
+            <if test="used==true">
+                and used is true
+            </if>
+        </where>
+        group by type, custom;
+    </select>
+
+
+    <insert id="add" parameterType="com.my.count.model.HomeDto">
+        insert into home(label, custom, `count`, comment, `type`, cusDate, pic, used)
+        values (#{label}, #{custom}, #{count}, #{comment}, #{type}, #{cusDate}, #{pic}, #{used})
+    </insert>
+
+    <update id="update" parameterType="com.my.count.model.HomeDto">
+        update home
+        set label  = #{label},
+            custom= #{custom},
+            `count`= #{count},
+            comment= #{comment},
+            `type`= #{type},
+            cusDate= #{cusDate},
+            pic= #{pic},
+            used   = #{used}
+        where id = #{id}
+    </update>
+
+    <delete id="delete">
+        delete from home where id in
+        <foreach collection="ids" close=")" item="id" open="(" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
